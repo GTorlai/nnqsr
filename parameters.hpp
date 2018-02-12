@@ -29,13 +29,13 @@ public:
         cd_ = 10;
         nc_ = 100;
         lr_ = 0.01;
-        l2_ = 0.0;
+        l2_ = 0.0001;
         bs_ = 10;
-        ep_ = 100000;
+        ep_ = 1000;
         ns_ = 1000;
     }
     
-    //Read parameters from the command line
+    // Read parameters from the command line
     void ReadParameters(int argc,char** argv){
         std::string flag;
         
@@ -81,9 +81,9 @@ public:
         }
     }
     
-    //Print the parameters on screen
+    // Print the parameters
     void PrintParameters(){
-        std::cout << "Neural-Network Quantum State Tomography\n\n";
+        std::cout << "\nNeural-Network Quantum State Tomography\n\n";
         std::cout << " Number of visible units: " << nv_ << std::endl;
         std::cout << " Number of hidden units: " << nh_<< std::endl;
         std::cout << " Initial distribution width: " << w_<< std::endl;

@@ -14,6 +14,9 @@ The code is written in C++11, using the linear algebra library [Eigen3][2]. The 
 * `-ns`: Numer of training samples
 * `-ep`: Number of training iterations 
 
+To perform quantum state tomography, the main executable requires a data file ('training_data.txt'), where each row (0,1,1,0,...,1) corresponds to a training sample..
+
+
 [1]: https://arxiv.org/abs/1703.05334 "nnqst"
 [2]: https://eigen.tuxfamily.org
 
