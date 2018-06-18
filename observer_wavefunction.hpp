@@ -14,10 +14,6 @@ class ObserverPSI{
 
     int N_;
     int npar_;
-    double KL_;
-    double overlap_;
-    double Z_;
-
     Eigen::VectorXcd target_psi_;
     std::vector<Eigen::VectorXcd> rotated_wf_;
     Eigen::MatrixXd basis_states_;      // Hilbert space basis
@@ -25,6 +21,10 @@ class ObserverPSI{
     std::vector<std::vector<std::string> > basisSet_;
 
 public:
+
+    double KL_;
+    double overlap_;
+    double Z_;
 
     ObserverPSI(Wavefunction &PSI):PSI_(PSI){ 
         

@@ -6,3 +6,4 @@
 #include "sgd.hpp"
 #include "observer_wavefunction.hpp"
 #include "tomography.hpp"
+#include "test_tomography.hpp"

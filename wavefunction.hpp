@@ -153,12 +153,6 @@ public:
             num += U*Grad(v)*psi(v); 
             den += U*psi(v);
         }
-        //gradR = num / den;
-        //std::cout << num << std::endl;
-        //Eigen::VectorXd rotated_grad(npar_);
-        //rotated_grad << gradR.head(npar_/2).real(),-gradR.tail(npar_/2).imag(); 
-        ////std::cout << rotated_grad << std::endl; 
-        //return rotated_grad;
         gradR = num/den;
     }
 

@@ -46,16 +46,16 @@ int main(int argc, char* argv[]){
     obs.setBasis(basisSet);
     obs.setRotatedWavefunctions(rotated_target_psi);
     
-
     //---- TOMOGRAPHY ----//
-    qst::Tomography<NNState,Observer,Optimizer> tomo(opt,nn,obs,par);
-    tomo.setBasisRotations(UnitaryRotations);
-    tomo.Run(training_samples,training_bases);
+    //qst::Tomography<NNState,Observer,Optimizer> tomo(opt,nn,obs,par);
+    //tomo.setBasisRotations(UnitaryRotations);
+    //tomo.Run(training_samples,training_bases);
     
-    
-    
-    //---- TEST ----// #Need the test file (not currently on the repo)
-    //tomo.setBasis(basisSet);
-    //tomo.setRotatedWavefunctions(rotated_target_psi);
-    //tomo.DerKLTest(0.000001);
+    //---- TEST ----// 
+    qst::Test<NNState,Observer> test(nn,obs,par);
+    test.setWavefunction(target_psi);
+    test.setBasisRotations(UnitaryRotations);
+    test.setBasis(basisSet);
+    test.setRotatedWavefunctions(rotated_target_psi);
+    test.DerKL(0.000001);
 }
