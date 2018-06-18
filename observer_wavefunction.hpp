@@ -113,7 +113,6 @@ public:
     void setRotatedWavefunctions(std::vector<Eigen::VectorXcd> & psi){
         for(int b=0;b<psi.size();b++){
             rotated_wf_.push_back(psi[b]);
-            std::cout<<rotated_wf_[b]<<std::endl;
         }
     }
     //Set the value of the target wavefunction
