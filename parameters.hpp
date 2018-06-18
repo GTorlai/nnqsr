@@ -20,19 +20,22 @@ public:
     int bs_;     // Batch size
     int ep_;     // Training iterations
     int ns_;     // Number of training samples
-   
+    int nb_;     // Number of bases
+
     // Constructor
     Parameters() {
-        nv_ = 10;
-        nh_ = 10;
-        w_  = 0.01;
-        cd_ = 10;
-        nc_ = 100;
-        lr_ = 0.01;
+        // Default values
+        nv_ = 2;
+        nh_ = 2;
+        w_  = 0.1;
+        cd_ = 2;
+        nc_ = 10;
+        lr_ = 0.1;
         l2_ = 0.0001;
         bs_ = 10;
-        ep_ = 1000;
-        ns_ = 1000;
+        ep_ = 1000000;
+        ns_ = 100;
+        nb_ = 5;
     }
     
     // Read parameters from the command line
@@ -79,6 +82,7 @@ public:
         for(int i=1;i<argc;i++){
             if(flag==argv[i]) ep_=atoi(argv[i+1]);
         }
+        nb_ = 2*nv_+1;
     }
     
     // Print the parameters
@@ -94,6 +98,7 @@ public:
         std::cout << " Batch size: " << bs_<< std::endl;
         std::cout << " Number of training samples: " << ns_<< std::endl;
         std::cout << " Number of training iterations " << ep_<< std::endl;
+        std::cout << std::endl<<std::endl;
     }
 };
 }

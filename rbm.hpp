@@ -3,7 +3,7 @@
 #include <iostream>
 #include <Eigen/Dense>
 #include <random>
-//#include <fstream>
+#include <fstream>
 
 namespace qst{
 
@@ -33,8 +33,8 @@ public:
     Rbm(Parameters &par):nv_(par.nv_),nh_(par.nh_){
         npar_=nv_+nh_+nv_*nh_;
         nchains_ = par.nc_;
-        v_.resize(nchains_,nv_);
-        h_.resize(nchains_,nh_);
+        v_.setZero(nchains_,nv_);
+        h_.setZero(nchains_,nh_);
         probv_given_h_.resize(nchains_,nv_);
         probh_given_v_.resize(nchains_,nh_);
         W_.resize(nh_,nv_);
@@ -85,8 +85,8 @@ public:
         }
     }
 
-    // Compute derivative of log-probability
-    Eigen::VectorXd DerLog(const Eigen::VectorXd & v){
+    // Compute derivative of the effective visible energy
+    Eigen::VectorXd VisEnergyGrad(const Eigen::VectorXd & v){
         Eigen::VectorXd der(npar_);
         int p=0;
         logistic(W_*v+c_,gamma_);
@@ -104,18 +104,13 @@ public:
             der(p)=gamma_(i);
             p++;
         } 
-        return der;
+        return -der;
     }
    
-    // Return the wavefunction coefficient for state v
-    inline double psi(const Eigen::VectorXd & v){
-        return exp(0.5*LogVal(v));
-    }
-    
-    // Value of the logarithm of the RBM probability
-    inline double LogVal(const Eigen::VectorXd & v){
+    // Return the probability for state v
+    inline double prob(const Eigen::VectorXd & v){
         ln1pexp(W_*v+c_,gamma_);
-        return v.dot(b_)+gamma_.sum();
+        return std::exp(v.dot(b_)+gamma_.sum());
     }
     
     // Conditional Probabilities 
@@ -126,7 +121,7 @@ public:
         logistic((h*W_).rowwise() + b_.transpose(),probs);
     }
 
-    // Sample the one layer 
+    // Sample one layer 
     void SampleLayer(Eigen::MatrixXd & hv,const Eigen::MatrixXd & probs){
         std::uniform_real_distribution<double> distribution(0,1);
         for(int s=0;s<hv.rows();s++){
@@ -185,7 +180,24 @@ public:
             p++;
         }
     }
-    
+
+    // Read weights from file 
+    void LoadWeights(std::string & name){
+        std::ifstream fin(name);
+        for(int i=0;i<nh_;i++){
+            for(int j=0;j<nv_;j++){
+                fin >> W_(i,j);
+            }
+        }
+        for(int j=0;j<nv_;j++){
+            fin >> b_(j);
+        }
+        for(int i=0;i<nh_;i++){
+            fin >> c_(i);
+        }
+        fin.close(); 
+    }
+ 
     // Functions 
     inline void logistic(const Eigen::VectorXd & x,Eigen::VectorXd & y){
         for(int i=0;i<x.size();i++){
@@ -213,6 +225,7 @@ public:
     }
 
  };
+
 }
 
 #endif
