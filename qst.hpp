@@ -4,5 +4,5 @@
 #include "rbm.hpp"
 #include "wavefunction.hpp"
 #include "sgd.hpp"
-//#include "observer.hpp"
+#include "observer_wavefunction.hpp"
 #include "tomography.hpp"
