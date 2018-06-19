@@ -12,19 +12,18 @@ int main(int argc, char* argv[]){
     //---- SPECIFIC PARAMETERS ----/
     
     // TFIM1d with 10 SPINS
-    //typedef qst::WavefunctionPositive NNState;       //Positive Wavefunction
-    //par.basis_ = "std";
-    //std::string model = "tfim1d_N10";
-    //par.nv_=10;
-    //par.nh_=10;
+    typedef qst::WavefunctionPositive NNState;       //Positive Wavefunction
+    par.basis_ = "std";
+    std::string model = "tfim1d_N10";
+    par.nv_=10;
+    par.nh_=10;
     
     // 2qubits complex 
-    typedef qst::WavefunctionComplex NNState;       //Complex Wavefunction
-    par.basis_ = "xy1";
-    std::string model = "2qubits";
-    par.nv_=2;
-    par.nh_=2;
-
+    //typedef qst::WavefunctionComplex NNState;       //Complex Wavefunction
+    //par.basis_ = "xy1";
+    //std::string model = "2qubits";
+    //par.nv_=2;
+    //par.nh_=2;
 
     typedef qst::Sgd Optimizer;                     //Stochastic gradient descent
     typedef qst::ObserverPSI<NNState> Observer;              //Observer for Wavefunction
@@ -48,7 +47,6 @@ int main(int argc, char* argv[]){
     fileName = baseName + "bases.txt";
     qst::LoadBasesConfigurations(par,fileName,basisSet);                //Load training samples
     qst::LoadTrainingData(baseName,par,training_samples,training_bases);//Load training bases
-    
    
     //---- OPTIMIZER ----//
     Optimizer opt(par);         //Construc the optimizer object
