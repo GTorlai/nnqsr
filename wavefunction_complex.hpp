@@ -71,7 +71,6 @@ public:
         return amplitude(v)*exp(0.5*I_*phase(v));
     }
 
-   
     //---- SAMPLING ----/
     
     //Conditional Probabilities for the amplitude RBM 
