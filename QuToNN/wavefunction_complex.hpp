@@ -156,17 +156,6 @@ public:
     void SetParameters(const Eigen::VectorXd & pars){
         rbmAm_.SetParameters(pars.head(nparLambda_));
         rbmPh_.SetParameters(pars.tail(nparMu_));
-        //Eigen::VectorXd parsAm(nparLambda_);
-        //Eigen::VectorXd parsPh(npar_-nparLambda_);
-
-        //for(int i=0;i<nparLambda_;i++){
-        //    parsAm(i)=pars(i);
-        //}
-        //for(int i=0;i<npar_-nparLambda_;i++){
-        //    parsPh(i)=pars(nparLambda_+i);
-        //}
-        //rbmAm_.SetParameters(parsAm);
-        //rbmPh_.SetParameters(parsPh);
     }
 };
 }

@@ -62,7 +62,12 @@ public:
     inline Eigen::VectorXd VisibleStateRow(int s){
         return v_.row(s);
     }
-    
+    inline Eigen::VectorXd HiddenBias(){
+        return c_;
+    }
+    inline Eigen::MatrixXd Weights(){
+        return W_;
+    }
     // Set the visible layer state
     inline void SetVisibleLayer(Eigen::MatrixXd v){
         v_=v;
@@ -108,10 +113,18 @@ public:
     }
    
     // Return the probability for state v
-    inline double prob(const Eigen::VectorXd & v){
+    inline double EffectiveEnergy(const Eigen::VectorXd & v){
         ln1pexp(W_*v+c_,gamma_);
-        return std::exp(v.dot(b_)+gamma_.sum());
+        return -v.dot(b_)-gamma_.sum();
     }
+    // Return the probability for state v
+    inline double prob(const Eigen::VectorXd & v){
+        return std::exp(-EffectiveEnergy(v));
+    }
+    //// Return the probability for state v
+    //inline Eigen::VectorXd WeightsProduct(const Eigen::VectorXd & v){
+    //    return W_*v;
+    //}
     
     // Conditional Probabilities 
     void ProbHiddenGivenVisible(const Eigen::MatrixXd &v,Eigen::MatrixXd &probs){
@@ -223,7 +236,6 @@ public:
             y(i)=ln1pexp(x(i));
         }
     }
-
  };
 
 }

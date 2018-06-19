@@ -8,9 +8,9 @@
 
 namespace qst{
 
-template<class Wavefunction> class ObserverPSI{
+template<class NNState> class ObserverWavefunction{
 
-    Wavefunction &PSI_;
+    NNState &PSI_;
 
     int N_;
     int npar_;
@@ -26,7 +26,7 @@ public:
     double overlap_;
     double Z_;
 
-    ObserverPSI(Wavefunction &PSI,std::string &basis):PSI_(PSI){ 
+    ObserverWavefunction(NNState &PSI,std::string &basis):PSI_(PSI){ 
         
         std::cout<<"- Initializing observer module"<<std::endl;
         N_ = PSI_.N();
