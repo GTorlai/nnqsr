@@ -13,6 +13,7 @@ class WavefunctionComplex{
     int N_;            // Number of degrees of freedom (visible units)
     int npar_;         // Number of parameters
     int nparLambda_;   // Number of amplitude parameters
+    int nparMu_;       // Number of phase parameters
     Rbm rbmAm_;        // RBM for the amplitude
     Rbm rbmPh_;        // RBM for the phases
 
@@ -26,8 +27,9 @@ public:
     WavefunctionComplex(Parameters &par):rbmAm_(par),
                                   rbmPh_(par),
                                   I_(0,1){
-        npar_ = rbmAm_.Npar() + rbmPh_.Npar();  // Total number of parameters
         nparLambda_ = rbmAm_.Npar();
+        nparMu_ = rbmPh_.Npar();
+        npar_ = nparLambda_+ nparMu_;  // Total number of parameters
         N_ = rbmAm_.Nvisible();
         std::random_device rd;
         //rgen_.seed(rd());
@@ -44,18 +46,19 @@ public:
     inline int NparLambda()const{
         return nparLambda_;
     }
+    inline int NparMu()const{
+        return nparMu_;
+    }
     inline int Nchains(){
         return rbmAm_.Nchains();
     }
     inline Eigen::VectorXd VisibleStateRow(int s){
         return rbmAm_.VisibleStateRow(s);
     }
-
     // Set the state of the wavefunction's degrees of freedom
     inline void SetVisibleLayer(Eigen::MatrixXd v){
         rbmAm_.SetVisibleLayer(v);
     }
- 
     // Initialize the wavefunction parameters    
     void InitRandomPars(int seed,double sigma){
         rbmAm_.InitRandomPars(seed,sigma);
@@ -151,17 +154,19 @@ public:
 
     // Set RBM parameters
     void SetParameters(const Eigen::VectorXd & pars){
-        Eigen::VectorXd parsAm(nparLambda_);
-        Eigen::VectorXd parsPh(npar_-nparLambda_);
+        rbmAm_.SetParameters(pars.head(nparLambda_));
+        rbmPh_.SetParameters(pars.tail(nparMu_));
+        //Eigen::VectorXd parsAm(nparLambda_);
+        //Eigen::VectorXd parsPh(npar_-nparLambda_);
 
-        for(int i=0;i<nparLambda_;i++){
-            parsAm(i)=pars(i);
-        }
-        for(int i=0;i<npar_-nparLambda_;i++){
-            parsPh(i)=pars(nparLambda_+i);
-        }
-        rbmAm_.SetParameters(parsAm);
-        rbmPh_.SetParameters(parsPh);
+        //for(int i=0;i<nparLambda_;i++){
+        //    parsAm(i)=pars(i);
+        //}
+        //for(int i=0;i<npar_-nparLambda_;i++){
+        //    parsPh(i)=pars(nparLambda_+i);
+        //}
+        //rbmAm_.SetParameters(parsAm);
+        //rbmPh_.SetParameters(parsPh);
     }
 };
 }

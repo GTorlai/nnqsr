@@ -12,18 +12,18 @@ int main(int argc, char* argv[]){
     //---- SPECIFIC PARAMETERS ----/
     
     // TFIM1d with 10 SPINS
-    typedef qst::WavefunctionPositive NNState;       //Positive Wavefunction
-    par.basis_ = "std";
-    std::string model = "tfim1d_N10";
-    par.nv_=10;
-    par.nh_=10;
+    //typedef qst::WavefunctionPositive NNState;       //Positive Wavefunction
+    //par.basis_ = "std";
+    //std::string model = "../data/tfim1d_N10";
+    //par.nv_=10;
+    //par.nh_=10;
     
     // 2qubits complex 
-    //typedef qst::WavefunctionComplex NNState;       //Complex Wavefunction
-    //par.basis_ = "xy1";
-    //std::string model = "2qubits";
-    //par.nv_=2;
-    //par.nh_=2;
+    typedef qst::WavefunctionComplex NNState;       //Complex Wavefunction
+    par.basis_ = "xy1";
+    std::string model = "2qubits";
+    par.nv_=2;
+    par.nh_=2;
 
     typedef qst::Sgd Optimizer;                     //Stochastic gradient descent
     typedef qst::ObserverPSI<NNState> Observer;              //Observer for Wavefunction
@@ -31,7 +31,7 @@ int main(int argc, char* argv[]){
 
     //Load the data
     std::string fileName; 
-    std::string baseName = "data/"+model+"_";
+    std::string baseName = "../data/"+model+"_";
     qst::SetNumberOfBases(par);
     Eigen::VectorXcd target_psi(1<<par.nv_);                //Target wavefunction
     std::vector<Eigen::VectorXcd> rotated_target_psi;       //Vector with the target wavefunctions in different basis
