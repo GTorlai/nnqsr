@@ -1,5 +1,5 @@
-#ifndef QST_WAVEFUNCTION_HPP
-#define QST_WAVEFUNCTION_HPP
+#ifndef QST_WAVEFUNCTIONCOMPLEX_HPP
+#define QST_WAVEFUNCTIONCOMPLEX_HPP
 #include <iostream>
 #include <Eigen/Dense>
 #include <random>
@@ -8,7 +8,7 @@
 
 namespace qst{
 
-class Wavefunction{
+class WavefunctionComplex{
 
     int N_;        // Number of degrees of freedom (visible units)
     int npar_;    // Number of parameters
@@ -23,7 +23,7 @@ class Wavefunction{
     
 public:
     // Constructor 
-    Wavefunction(Parameters &par):rbmAm_(par),
+    WavefunctionComplex(Parameters &par):rbmAm_(par),
                                   rbmPh_(par),
                                   I_(0,1){
         npar_ = rbmAm_.Npar() + rbmPh_.Npar();  // Total number of parameters

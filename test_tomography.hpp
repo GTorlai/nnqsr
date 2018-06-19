@@ -21,7 +21,7 @@ template<class NNState,class Observer> class Test{
 
     int N_;
     int npar_;                          // Number of variational parameters
-
+    std::string basis_;
     Eigen::VectorXd grad_;         // Gradient 
     Eigen::VectorXcd rotated_grad_;
     std::mt19937 rgen_;                 // Random number generator
@@ -38,7 +38,7 @@ public:
         npar_=NNstate_.Npar();
         grad_.resize(npar_);
         rotated_grad_.resize(npar_);
-        
+        basis_ = par.basis_;
         basis_states_.resize(1<<N_,N_);
         std::bitset<10> bit;
         // Create the basis of the Hilbert space
@@ -62,25 +62,27 @@ public:
 
         //-- ALGORITHMIC DERIVATIVES --//
         //Standard Basis
+        // TODO DEAL WITH DIFFERENCE IN NPAR BETWEEN COMPLEC AND POSITIVE
         for(int j=0;j<1<<N_;j++){
             //Positive phase - Lambda gradient in reference basis
             ders.head(npar_/2) +=  norm(target_psi_(j))*NNstate_.LambdaGrad(basis_states_.row(j));
             //Negative phase - Lambda gradient in reference basis
             ders.head(npar_/2) -= NNstate_.LambdaGrad(basis_states_.row(j))*norm(NNstate_.psi(basis_states_.row(j)))/obs_.Z_;
         }
-        //Rotated Basis
-        for(int b=1;b<basisSet_.size();b++){
-            for(int j=0;j<1<<N_;j++){
-                NNstate_.rotatedGrad(basisSet_[b],basis_states_.row(j),U_,derKL);
-                //Positive phase - Lambda gradient in basis b
-                ders.head(npar_/2) += norm(rotated_wf_[b-1](j))*derKL.head(npar_/2).real();
-                //Positive phase - Mu gradient in basis b
-                ders.tail(npar_/2) -= norm(rotated_wf_[b-1](j))*derKL.tail(npar_/2).imag();
-                //Negative phase - Lambda gradient in basis b (identical to the reference basis
-                ders.head(npar_/2) -= NNstate_.LambdaGrad(basis_states_.row(j))*norm(NNstate_.psi(basis_states_.row(j)))/obs_.Z_;
+        if (basis_.compare("std")!=0){
+            //Rotated Basis
+            for(int b=1;b<basisSet_.size();b++){
+                for(int j=0;j<1<<N_;j++){
+                    NNstate_.rotatedGrad(basisSet_[b],basis_states_.row(j),U_,derKL);
+                    //Positive phase - Lambda gradient in basis b
+                    ders.head(npar_/2) += norm(rotated_wf_[b-1](j))*derKL.head(npar_/2).real();
+                    //Positive phase - Mu gradient in basis b
+                    ders.tail(npar_/2) -= norm(rotated_wf_[b-1](j))*derKL.tail(npar_/2).imag();
+                    //Negative phase - Lambda gradient in basis b (identical to the reference basis
+                    ders.head(npar_/2) -= NNstate_.LambdaGrad(basis_states_.row(j))*norm(NNstate_.psi(basis_states_.row(j)))/obs_.Z_;
+                }
             }
         }
-
         //-- NUMERICAL DERIVATIVES --//
         for(int p=0;p<npar_;p++){
             pars(p)+=eps;
