@@ -150,11 +150,11 @@ public:
         return der;
     } 
     // Full Gradient
-    Eigen::VectorXd Grad(const Eigen::VectorXd &v,const Eigen::VectorXd &vp){
+    Eigen::VectorXcd Grad(const Eigen::VectorXd &v,const Eigen::VectorXd &vp){
     
         Eigen::VectorXcd der(npar_);
         der << LambdaGrad(v,vp),MuGrad(v,vp);
-        return der.real();
+        return der;
     }
    
     //Compute the gradient of the effective energy in an arbitrary basis given by U
