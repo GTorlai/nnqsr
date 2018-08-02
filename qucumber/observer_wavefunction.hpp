@@ -8,37 +8,41 @@
 
 namespace qst{
 
-template<class NNState> class ObserverWavefunction{
+template<class Wavefunction> class ObserverPSI{
 
-    NNState &PSI_;
+    Wavefunction &PSI_;
 
     int N_;
     int npar_;
     Eigen::VectorXcd target_psi_;
     std::vector<Eigen::VectorXcd> rotated_wf_;
-    Eigen::MatrixXd basis_states_;      // Hilbert space basis
     std::map<std::string,Eigen::MatrixXcd> U_;
-    std::vector<std::vector<std::string> > basisSet_;
     std::string basis_;
+    std::vector<std::vector<std::string> > basisSet_;
 public:
 
     double KL_;
     double overlap_;
+    double fidelity_;
     double Z_;
+    double NLL_;
+    Eigen::MatrixXd basis_states_;      // Hilbert space basis
 
-    ObserverWavefunction(NNState &PSI,std::string &basis):PSI_(PSI){ 
+    ObserverPSI(Wavefunction &PSI,std::string &basis):PSI_(PSI){ 
         
         std::cout<<"- Initializing observer module"<<std::endl;
         N_ = PSI_.N();
         npar_ = PSI_.Npar();
         basis_ = basis;
-        basis_states_.resize(1<<N_,N_);
-        std::bitset<10> bit;
+        std::bitset<16> bit;
         // Create the basis of the Hilbert space
-        for(int i=0;i<1<<N_;i++){
-            bit = i;
-            for(int j=0;j<N_;j++){
-                basis_states_(i,j) = bit[N_-j-1];
+        basis_states_.resize(1<<N_,N_);
+        if (N_ < 16){
+            for(int i=0;i<1<<N_;i++){
+                bit = i;
+                for(int j=0;j<N_;j++){
+                    basis_states_(i,j) = bit[N_-j-1];
+                }
             }
         }
     }
@@ -46,8 +50,9 @@ public:
     //Compute different estimators for the training performance
     void Scan(int i){//,Eigen::MatrixXd &nll_test,std::ofstream &obs_out){
         ExactPartitionFunction();
-        ExactKL(); 
-        Overlap();
+        //PrintWF();
+        //ExactKL(); 
+        Fidelity();
         PrintStats(i);
     }
 
@@ -60,6 +65,15 @@ public:
     }
 
     // Compute the overlap with the target wavefunction
+    void PrintWF(){
+        std::cout<<N_<<std::endl;
+        for(int i=0;i<basis_states_.rows();i++){
+            std::cout<<PSI_.psi(basis_states_.row(i))/std::sqrt(Z_)<<std::endl;
+        }
+        std::cout<<std::endl;
+    }
+
+    // Compute the overlap with the target wavefunction
     void Overlap(){
         overlap_ = 0.0;
         std::complex<double> tmp;
@@ -68,7 +82,43 @@ public:
         }
         overlap_ = abs(tmp);
     }
+    // Compute the fidelity with the target wavefunction 
+    void Fidelity(){
+        Overlap();
+        fidelity_= overlap_*overlap_;
+    }
     
+    void NLL(Eigen::MatrixXd &data_samples,std::vector<std::vector<std::string> > &data_bases){
+        NLL_ = 0.0;
+        Eigen::VectorXcd rotated_psi(1<<N_);
+        int b_ID=0;
+        for (int i=0;i<data_samples.rows();i++){
+            b_ID=0;
+            for(int j=0;j<N_;j++){
+                if (data_bases[i][j]!="Z"){
+                    b_ID = 1;
+                    break;
+                }
+            } 
+            if(b_ID==0){
+                NLL_ -= log(norm(PSI_.psi(data_samples.row(i))));
+                NLL_ += log(Z_);
+            }
+            else{
+                rotateRbmWF(data_bases[i],rotated_psi);
+                int ind = 0;
+                for (int j=0;j<N_;j++){
+                    if (data_samples(i,N_-j-1) == 1){
+                        ind += pow(2,j);
+                    }
+                }
+                NLL_ -=log(norm(rotated_psi(ind)));
+                NLL_ += log(Z_);
+            }
+        }
+        NLL_ /=float(data_samples.rows());
+    }
+
     //Compute KL divergence exactly
     void ExactKL(){
         Eigen::VectorXcd rotated_psi(1<<N_);
@@ -85,6 +135,7 @@ public:
             //KL in the rotated bases
             for (int b=1;b<basisSet_.size();b++){
                 rotateRbmWF(basisSet_[b],rotated_psi);
+                //std::cout<<rotated_psi.transpose()<<std::endl;
                 for(int i=0;i<1<<N_;i++){
                     if (norm(rotated_wf_[b-1](i))>0.0){
                         KL_ += norm(rotated_wf_[b-1](i))*log(norm(rotated_wf_[b-1](i)));
@@ -94,13 +145,14 @@ public:
                 }
             }
         }
+        KL_/=float(basisSet_.size());
     }
     
     //Print observer
     void PrintStats(int i){
-        std::cout << "Epoch: " << i << "\t";     
-        std::cout << "KL = " << std::setprecision(10) << KL_ << "\t";
-        std::cout << "Overlap = " << std::setprecision(10) << overlap_<< "\t";//<< Fcheck_;
+        std::cout << "Epoch: " << i << " \t";     
+        std::cout << "KL = " << std::setprecision(10) << KL_ << " \t";
+        std::cout << "Fidelity = " << std::setprecision(10) << fidelity_<< "\t";//<< Fcheck_;
         std::cout << std::endl;
     } 
 

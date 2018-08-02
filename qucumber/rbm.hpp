@@ -4,7 +4,6 @@
 #include <Eigen/Dense>
 #include <random>
 #include <fstream>
-
 namespace qst{
 
 // RBM class
@@ -62,14 +61,9 @@ public:
     inline Eigen::VectorXd VisibleStateRow(int s){
         return v_.row(s);
     }
-    inline Eigen::VectorXd HiddenBias(){
-        return c_;
-    }
-    inline Eigen::MatrixXd Weights(){
-        return W_;
-    }
     // Set the visible layer state
     inline void SetVisibleLayer(Eigen::MatrixXd v){
+        v_.resize(v.rows(),v.cols());
         v_=v;
     }
    
@@ -82,6 +76,8 @@ public:
                 W_(i,j)=distribution(generator);
             }
         }
+        //b_.setZero();
+        //c_.setZero();
         for(int j=0;j<nv_;j++){
             b_(j)=distribution(generator);
         }
@@ -90,9 +86,11 @@ public:
         }
     }
 
-    // Compute derivative of the effective visible energy
+    //Compute derivative of the effective visible energy
     Eigen::VectorXd VisEnergyGrad(const Eigen::VectorXd & v){
+        Eigen::VectorXd ders(npar_);
         Eigen::VectorXd der(npar_);
+        ders.setZero(npar_);
         int p=0;
         logistic(W_*v+c_,gamma_);
         for(int i=0;i<nh_;i++){
@@ -108,23 +106,44 @@ public:
         for(int i=0;i<nh_;i++){
             der(p)=gamma_(i);
             p++;
-        } 
+        }
         return -der;
+        //Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> M;
+        //M = gamma_*v.transpose();
+        //Eigen::Map<Eigen::RowVectorXd> v1(M.data(), M.size());
+        //Eigen::VectorXd v2 = v1;
+        //ders.head(nv_*nh_)=-v2;
+        //ders.segment(nv_*nh_,nv_) = -v;
+        //ders.tail(nh_) = -gamma_;
+        //
+        //return ders;
     }
+    // Compute derivative of the effective visible energy
+    //Eigen::VectorXd VisEnergyGrad(const Eigen::MatrixXd & v){
+    //    Eigen::VectorXd ders(npar_);
+    //    Eigen::MatrixXd gamma(v.rows(),nh_);
+    //    std::cout<<v*W_.transpose().size()<<std::endl;
+    //    logistic((v*W_.transpose()).rowwise() + c_.transpose(),gamma);
+    //    //Eigen::MatrixXd w = gamma.transpose()*v;
+    //    //Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> M(w);
+    //    //Eigen::Map<Eigen::RowVectorXd> v1(M.data(), M.size());
+    //    //ders.head(nv_*nh_)=-v1/float(v.rows());
+    //    //ders.segment(nv_*nh_,nv_) = -v.colwise().sum()/float(v.rows());
+    //    //ders.tail(nh_) = -gamma.colwise().sum()/float(v.rows());;
+    //    return ders;
+    //}
    
+   
+    // Return the probability for state v
+    inline double prob(const Eigen::VectorXd & v){
+        ln1pexp(W_*v+c_,gamma_);
+        return std::exp(v.dot(b_)+gamma_.sum());
+    }
     // Return the probability for state v
     inline double EffectiveEnergy(const Eigen::VectorXd & v){
         ln1pexp(W_*v+c_,gamma_);
         return -v.dot(b_)-gamma_.sum();
     }
-    // Return the probability for state v
-    inline double prob(const Eigen::VectorXd & v){
-        return std::exp(-EffectiveEnergy(v));
-    }
-    //// Return the probability for state v
-    //inline Eigen::VectorXd WeightsProduct(const Eigen::VectorXd & v){
-    //    return W_*v;
-    //}
     
     // Conditional Probabilities 
     void ProbHiddenGivenVisible(const Eigen::MatrixXd &v,Eigen::MatrixXd &probs){
@@ -195,8 +214,7 @@ public:
     }
 
     // Read weights from file 
-    void LoadWeights(std::string & name){
-        std::ifstream fin(name);
+    void LoadWeights(std::ifstream &fin){
         for(int i=0;i<nh_;i++){
             for(int j=0;j<nv_;j++){
                 fin >> W_(i,j);
@@ -208,7 +226,25 @@ public:
         for(int i=0;i<nh_;i++){
             fin >> c_(i);
         }
-        fin.close(); 
+    }
+
+    // Read weights from file 
+    void SaveWeights(std::ofstream &fout){
+        for(int i=0;i<nh_;i++){
+            for(int j=0;j<nv_;j++){
+                fout << W_(i,j) << " ";
+            }
+            fout << std::endl;
+        }
+        fout << std::endl;
+        for(int j=0;j<nv_;j++){
+            fout <<  b_(j) << " ";
+        }
+        fout << std::endl <<std::endl;
+        for(int i=0;i<nh_;i++){
+            fout << c_(i) << " ";
+        }
+        fout << std::endl <<std::endl;
     }
  
     // Functions 
@@ -236,6 +272,27 @@ public:
             y(i)=ln1pexp(x(i));
         }
     }
+    void PrintParameters(){
+        std::cout << "Weights" <<std::endl<<std::endl;
+        for(int i=0;i<nh_;i++){
+            for(int j=0;j<nv_;j++){
+                std::cout << W_(i,j) << " ";
+            }
+            std::cout<<std::endl;
+        }
+        std::cout<<std::endl;
+        std::cout << "Visible bias" <<std::endl<<std::endl;
+        for(int j=0;j<nv_;j++){
+            std::cout << b_(j) << " ";
+        }
+        std::cout<<std::endl;
+        std::cout << "Hidden bias" <<std::endl<<std::endl;
+        for(int i=0;i<nh_;i++){
+            std::cout << c_(i) << " ";
+        } 
+        std::cout<<std::endl;
+    }
+
  };
 
 }
