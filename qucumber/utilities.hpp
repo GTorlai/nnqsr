@@ -79,7 +79,7 @@ void LoadWavefunction(Parameters & par,std::string &wf_fileName,Eigen::VectorXd 
 }
 
 void LoadWavefunction(Parameters & par,std::string &wf_fileName,Eigen::VectorXcd & wf,std::vector<Eigen::VectorXcd> & rotated_wf){
-
+  std::cout << wf_fileName<<std::endl;
     std::ifstream fin(wf_fileName);
     double x_in;
     wf.resize(1<<par.nv_);

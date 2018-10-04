@@ -2,7 +2,7 @@
 #include "parameters.hpp"
 #include "utilities.hpp"
 #include "rbm.hpp"
-#include "wavefunction_real.hpp"
+//#include "wavefunction_real.hpp"
 #include "wavefunction_complex.hpp"
 #include "wavefunction_positive.hpp"
 #include "sgd.hpp"

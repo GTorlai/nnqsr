@@ -86,8 +86,8 @@ public:
                     alg_ders.head(nparLambda_) -= NNstate_.LambdaGrad(basis_states_.row(j))*norm(NNstate_.psi(basis_states_.row(j)))/obs_.Z_;
                 }
             }
+            alg_ders /= float(basisSet_.size());
         }
-        alg_ders /= float(basisSet_.size());
         //-- NUMERICAL DERIVATIVES --//
         for(int p=0;p<npar_;p++){
             pars(p)+=eps;

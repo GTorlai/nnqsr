@@ -144,8 +144,8 @@ public:
                     KL_ += norm(rotated_wf_[b-1](i))*log(Z_);
                 }
             }
+            KL_/=float(basisSet_.size());
         }
-        KL_/=float(basisSet_.size());
     }
     
     //Print observer
